@@ -186,41 +186,52 @@ class WordSet(Ruleset):
         for word in words:
             self.rules.append(WordRule(token_name, word))
 
+class AlphaCharacterRule(SyntaxRule):
+    def match(self, char_stream: CharacterStream):
+
+        code = ord(char_stream.peek())
+        if ord('A') <= code <= ord('Z'):
+            return ("Symbol", char_stream.pop())
+        
+        return None
+    
 class GreedyConsumerRule(SyntaxRule):
     pass
 
     
 #operator_rule = Ruleset([CharacterRule("+"), CharacterRule("-"), CharacterRule("/")])
 
-rules = [
-    WordSet("keyword", keywords.python), 
-    IdentifierRule(), 
-    NumberRule(), 
-    CharacterSet("operator", syntax.standard_operators), 
-    CharacterSet("bracket", syntax.standard_brackets), 
-    CharacterSet("delim", '#,.:'), 
-    CharacterRule("newline", '\n'), 
-    StringRule()
-]
+if __name__ == "__main__":
 
-parser = TextParser(rules, ignore=" ;\t\r")
+    rules = [
+        WordSet("keyword", keywords.python), 
+        IdentifierRule(), 
+        NumberRule(), 
+        CharacterSet("operator", syntax.standard_operators), 
+        CharacterSet("bracket", syntax.standard_brackets), 
+        CharacterSet("delim", '#,.:'), 
+        CharacterRule("newline", '\n'), 
+        StringRule()
+    ]
 
-text = ""
-with open("test.code", 'r') as file:
-    text = file.read()
+    parser = TextParser(rules, ignore=" ;\t\r")
 
-from pprint import pprint
-result = parser.parse(text)
+    text = ""
+    with open("test.code", 'r') as file:
+        text = file.read()
 
-count =0
-for i in range(len(result)-3):
-    tok1 = result[i]
-    tok2 = result[i+1]
-    tok3 = result[i+2]
+    from pprint import pprint
+    result = parser.parse(text)
 
-    if tok1[0] == "keyword" and tok2[0] == "symbol" and tok3[0] == "bracket":
-        if tok1[1] == 'def':
-            print(f"Function definition with name: {tok2[1]}")
-            count += 1
+    count =0
+    for i in range(len(result)-3):
+        tok1 = result[i]
+        tok2 = result[i+1]
+        tok3 = result[i+2]
 
-print(f"{count} total functions were found")
+        if tok1[0] == "keyword" and tok2[0] == "symbol" and tok3[0] == "bracket":
+            if tok1[1] == 'def':
+                print(f"Function definition with name: {tok2[1]}")
+                count += 1
+
+    print(f"{count} total functions were found")
