@@ -1,3 +1,6 @@
+from typing import List, Tuple
+
+
 class Stream:
     """A generic stream that can be iterated over and provides methods to pop the next item or peek at it without popping it."""
 
@@ -70,3 +73,19 @@ class Stream:
             return self.pop()
 
         raise StopIteration()
+    
+class TokenStream(Stream):
+    def __init__(self, tokens: List[Tuple]):
+        super().__init__(tokens, len(tokens))
+
+class CharacterStream(Stream):
+    """A character stream that can be iterated over and provides methods to pop the next character or peek at it without popping it."""
+
+    def __init__(self, stream: str):
+        """
+        Initialize a new character stream.
+
+        Args:
+            stream (str): The string to use as the character stream.
+        """
+        super().__init__(stream, len(stream))

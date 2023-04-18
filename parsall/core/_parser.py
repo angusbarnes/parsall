@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from Stream import Stream
+from core.Streams import TokenStream
 from enum import Enum
 
 class TokenType(Enum):
@@ -23,9 +23,7 @@ class TokenType(Enum):
     ScopeModifier = 18
     Bracket = 19
 
-class TokenStream(Stream):
-    def __init__(self, tokens: List[Tuple]):
-        super().__init__(tokens, len(tokens))
+
 
 class ASTNode:
     def __init__(self, type_: str, children: List["ASTNode"] = None, value=None):

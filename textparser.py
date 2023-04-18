@@ -1,50 +1,9 @@
-import keywords
-import syntax
-from Stream import Stream
+from parsall.core.Streams import CharacterStream
+from parsall.lexing import DefaultLexer
+from parsall.core.rule import SyntaxRule
+from parsall.semantics import python
+import parsall.semantics.syntax as syntax
 
-class CharacterStream(Stream):
-    """A character stream that can be iterated over and provides methods to pop the next character or peek at it without popping it."""
-
-    def __init__(self, stream: str):
-        """
-        Initialize a new character stream.
-
-        Args:
-            stream (str): The string to use as the character stream.
-        """
-        super().__init__(stream, len(stream))
-
-class TextParser:
-    def __init__(self, syntax_rules, ignore=" \t\n"):
-        self.syntax_rules = syntax_rules
-        self.ignore = ignore
-
-    def parse(self, input_text):
-        # Create a CharacterStream object from the input text
-        char_stream = CharacterStream(input_text)
-
-        # Start parsing the tokens using the syntax rules
-        parsed_text = []
-        while char_stream.peek() is not None:
-            while char_stream.peek() in self.ignore:
-                char_stream.pop()
-
-            for rule in self.syntax_rules:
-                match = rule.match(char_stream)
-                if match is not None:
-                    parsed_text.append(match)
-                    break
-            else:
-                # If no rule matches, raise an error
-                raise ValueError("Syntax error in input text: " + char_stream.peek())
-
-        return parsed_text
-
-class SyntaxRule:
-    def match(self, char_stream: CharacterStream) -> str:
-        # This method should return a match object if the rule matches
-        # the beginning of the token sequence, or None otherwise.
-        raise NotImplementedError("SyntaxRule is intended to abstract and as such it cannot be instantiated")
 
 #TODO: ignore case is currently not implemented
 class WordRule(SyntaxRule):
@@ -204,17 +163,17 @@ class GreedyConsumerRule(SyntaxRule):
 if __name__ == "__main__":
 
     rules = [
-        WordSet("keyword", keywords.python), 
+        WordSet("keyword", python.keywords), 
         IdentifierRule(), 
         NumberRule(), 
-        CharacterSet("operator", syntax.standard_operators), 
-        CharacterSet("bracket", syntax.standard_brackets), 
+        CharacterSet("operator", python.standard_operators), 
+        CharacterSet("bracket", python.standard_brackets), 
         CharacterSet("delim", '#,.:'), 
         CharacterRule("newline", '\n'), 
         StringRule()
     ]
 
-    parser = TextParser(rules, ignore=" ;\t\r")
+    parser = DefaultLexer(rules, ignore=" ;\t\r")
 
     text = ""
     with open("test.code", 'r') as file:
@@ -224,14 +183,19 @@ if __name__ == "__main__":
     result = parser.parse(text)
 
     count =0
+    decorator = None
     for i in range(len(result)-3):
         tok1 = result[i]
         tok2 = result[i+1]
         tok3 = result[i+2]
 
+        if tok1[1] == '@':
+            decorator = tok2[1]
+
         if tok1[0] == "keyword" and tok2[0] == "symbol" and tok3[0] == "bracket":
             if tok1[1] == 'def':
-                print(f"Function definition with name: {tok2[1]}")
+                print(f"Function definition with name: {tok2[1]} decorated with: {decorator}")
                 count += 1
+                decorator = None
 
     print(f"{count} total functions were found")
