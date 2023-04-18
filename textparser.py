@@ -1,3 +1,4 @@
+from typing import List, Tuple
 from parsall.core.Streams import CharacterStream
 from parsall.lexing import DefaultLexer
 from parsall.core.rule import SyntaxRule
@@ -106,7 +107,7 @@ class CharacterRule(SyntaxRule):
             return None
 
 class CompoundRule(SyntaxRule):
-    def __init__(self, token_name, rules_config):
+    def __init__(self, token_name, rules_config: List[Tuple[SyntaxRule, bool]]):
         self.rules = rules_config
         self.token_name = token_name
 
@@ -117,8 +118,7 @@ class CompoundRule(SyntaxRule):
             if rule_match is None:
                 return None
             if include_text:
-                match_text += rule_match
-            text = text[len(rule_match):]
+                match_text += rule_match[1]
         return (self.token_name, match_text)
 
 
@@ -155,7 +155,22 @@ class AlphaCharacterRule(SyntaxRule):
         return None
     
 class GreedyConsumerRule(SyntaxRule):
-    pass
+    def __init__(self, consume_rule: SyntaxRule, end_rule: SyntaxRule):
+        self.consumer = consume_rule
+        self.end = end_rule
+
+    def match(self, char_stream: CharacterStream):
+
+        value = ""
+        while token := self.consumer.match(char_stream):
+            value += token[1]
+
+        result = self.end.match(char_stream)
+
+        if not result:
+            raise SyntaxError(char_stream.peek())
+        
+        return ("", value)
 
     
 #operator_rule = Ruleset([CharacterRule("+"), CharacterRule("-"), CharacterRule("/")])
@@ -170,6 +185,16 @@ if __name__ == "__main__":
         CharacterSet("bracket", python.standard_brackets), 
         CharacterSet("delim", '#,.:'), 
         CharacterRule("newline", '\n'), 
+        CompoundRule("Comment", [
+            (CharacterRule("", '#'), False),
+            (
+                GreedyConsumerRule(
+                    Ruleset([IdentifierRule(), CharacterRule("", ' ')]),
+                    CharacterRule("",'\n')
+                ),
+                True
+            )
+        ]),
         StringRule()
     ]
 
