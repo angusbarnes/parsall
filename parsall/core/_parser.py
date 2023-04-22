@@ -2,6 +2,11 @@ from typing import List, Tuple
 from core.Streams import TokenStream
 from enum import Enum
 
+"""
+  Use these default TokenTypes or define your own.
+  Note that for best compatibility with the default
+  parsers provided by this library.
+"""
 class TokenType(Enum):
     Identifier = 1
     Keyword = 2
