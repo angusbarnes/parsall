@@ -43,6 +43,9 @@ class Stream:
             return None
 
         return self.items[self.position+n]
+    
+    def advance(self, n=1):
+        self.position += n
 
     def lookahead(self, n) -> str:
         """

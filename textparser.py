@@ -145,6 +145,32 @@ class WordSet(Ruleset):
         for word in words:
             self.rules.append(WordRule(token_name, word))
 
+class CommentRule(SyntaxRule):
+    def __init__(self, comment_pattern, terminator) -> None:
+        self.begin = comment_pattern
+        self.terminator = terminator
+        self.pattern_length = len(comment_pattern)
+    def match(self, char_stream: CharacterStream) -> str:
+        
+        if char_stream.lookahead(self.pattern_length) != self.begin:
+            return None
+        
+        char_stream.advance(self.pattern_length)
+
+        comment_string = ""
+        while char_stream.peek() != self.terminator:
+            comment_string += char_stream.pop()
+
+        # TODO: Provide a global method to eat a terminating chacter and raise
+        #       required errors
+        result = CharacterRule("", self.terminator).match(char_stream)
+
+        if not result:
+            raise SyntaxError(char_stream.peek())
+        
+        return ("Comment", comment_string)
+
+
 class AlphaCharacterRule(SyntaxRule):
     def match(self, char_stream: CharacterStream):
 
@@ -183,18 +209,9 @@ if __name__ == "__main__":
         NumberRule(), 
         CharacterSet("operator", python.standard_operators), 
         CharacterSet("bracket", python.standard_brackets), 
-        CharacterSet("delim", '#,.:'), 
+        CharacterSet("delim", ',.:'), 
         CharacterRule("newline", '\n'), 
-        CompoundRule("Comment", [
-            (CharacterRule("", '#'), False),
-            (
-                GreedyConsumerRule(
-                    Ruleset([IdentifierRule(), CharacterRule("", ' ')]),
-                    CharacterRule("",'\n')
-                ),
-                True
-            )
-        ]),
+        CommentRule("#", '\n'),
         StringRule()
     ]
 
@@ -204,23 +221,23 @@ if __name__ == "__main__":
     with open("test.code", 'r') as file:
         text = file.read()
 
-    from pprint import pprint
+    import pprint
     result = parser.parse(text)
 
+    with open("lexer.log", "w") as log_file:
+        pprint.pprint(result, log_file)
+
     count =0
-    decorator = None
+    assignment_count = 0
     for i in range(len(result)-3):
         tok1 = result[i]
         tok2 = result[i+1]
         tok3 = result[i+2]
 
-        if tok1[1] == '@':
-            decorator = tok2[1]
-
         if tok1[0] == "keyword" and tok2[0] == "symbol" and tok3[0] == "bracket":
             if tok1[1] == 'def':
-                print(f"Function definition with name: {tok2[1]} decorated with: {decorator}")
                 count += 1
-                decorator = None
+        elif tok1[1] == '=':
+            assignment_count += 1
 
-    print(f"{count} total functions were found")
+    print(f"{count} total functions were found and {assignment_count} variable assignments were made")

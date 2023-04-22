@@ -3,16 +3,7 @@ from textparser import *
 
 rules = [
     AlphaCharacterRule(),
-    CompoundRule("Comment", [
-        (CharacterRule("", '#'), False),
-        (
-            GreedyConsumerRule(
-                Ruleset([IdentifierRule(), CharacterRule("", ' ')]),
-                CharacterRule("",'\n')
-            ),
-            True
-        )
-    ]),
+    CommentRule("#", '\n'),
     CharacterSet("Operator", "+'~"),
     CharacterRule("Assignment", "="),
     CharacterSet("Scope", "()")
