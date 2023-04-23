@@ -2,12 +2,12 @@ from typing import List, Tuple
 from core.Streams import TokenStream
 from enum import Enum
 
-"""
-  Use these default TokenTypes or define your own.
-  Note that for best compatibility with the default
-  parsers provided by this library.
-"""
 class TokenType(Enum):
+    """
+    Use these default TokenTypes or define your own.
+    Note that for best compatibility with the default
+    parsers provided by this library.
+    """
     Identifier = 1
     Keyword = 2
     Operator = 3
@@ -25,7 +25,12 @@ class TokenType(Enum):
     Int = 15
     Word = 16
     Grammar = 17
+    
     ScopeModifier = 18
+    """
+    The scope modifier token type can be used for brackets or other syntax
+    which may delimate or define a data scope or unit of code.
+    """
     Bracket = 19
 
 
