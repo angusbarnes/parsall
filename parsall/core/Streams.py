@@ -77,6 +77,9 @@ class Stream:
 
         raise StopIteration()
     
+    def __repr__(self):
+        return str((self.items[self.position:]))
+    
 class TokenStream(Stream):
     def __init__(self, tokens: List[Tuple]):
         super().__init__(tokens, len(tokens))

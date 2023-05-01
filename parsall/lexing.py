@@ -5,7 +5,7 @@ class DefaultLexer:
         self.syntax_rules = syntax_rules
         self.ignore = ignore
 
-    def parse(self, input_text):
+    def tokenise(self, input_text):
         # Create a CharacterStream object from the input text
         char_stream = CharacterStream(input_text)
 

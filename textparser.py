@@ -18,14 +18,14 @@ if __name__ == "__main__":
         StringRule()
     ]
 
-    parser = DefaultLexer(rules, ignore=" ;\t\r")
+    lexer = DefaultLexer(rules, ignore=" ;\t\r")
 
     text = ""
     with open("test.code", 'r') as file:
         text = file.read()
 
     import pprint
-    result = parser.parse(text)
+    result = lexer.tokenise(text)
 
     with open("lexer.log", "w") as log_file:
         pprint.pprint(result, log_file)
