@@ -1,6 +1,6 @@
 from parsall.lexing import DefaultLexer
 from parsall.core.Streams import TokenStream
-from textparser import *
+from parsall.core.rule import *
 
 rules = [
     AlphaCharacterRule(),

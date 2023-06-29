@@ -22,6 +22,17 @@ class SyntaxRule:
         # the beginning of the token sequence, or None otherwise.
         raise NotImplementedError("SyntaxRule is intended to abstract and as such it cannot be instantiated")#TODO: ignore case is currently not implemented
 
+class IgnoreRule(SyntaxRule):
+    def __init__(self, ignore_list: List[str]):
+        self.ignore = ignore_list
+
+    def match(self, char_stream: CharacterStream) -> str:
+        if char_stream.peek() in self.ignore:
+            char_stream.pop()
+
+        return None
+
+
 class WordRule(SyntaxRule):
     def __init__(self, token_name, word, *, ignore_case = False):
         self.word = word
@@ -34,8 +45,8 @@ class WordRule(SyntaxRule):
         if char_stream.lookahead(self.length) != self.word:
             return None
         
-        if char_stream.peek(self.length).isalpha():
-            return None
+        # if (c := char_stream.peek(self.length)) and c.isalpha():
+        #     return None
 
         # If the target word is present, consume the same number of characters as the length of the word
         match_text = ""
